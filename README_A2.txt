@@ -29,11 +29,3 @@ NoAgent.act(s)
 IdealSensor.observe(s)
    Takes the true state s.
    Returns it exactly as it is — the sensor is perfect, no noise.
-
-
-
-
-
-
-HELLO THERE JAMIL
-hi THERE
