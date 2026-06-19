@@ -6,5 +6,6 @@
     "gitdoc.commitValidationLevel": "none",
     "gitdoc.autoCommitDelay": 5000,
     "gitdoc.autoPushDelay": 5000,
-    "gitdoc.autoPull": "afterDelay"
+    "gitdoc.autoPull": "off",
+    "gitdoc.pullOnOpen": true
 }
