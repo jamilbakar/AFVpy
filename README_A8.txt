@@ -58,4 +58,5 @@ NOTES ON THE JULIA TRANSLATION
   and DiscreteNonParametric, which scipy has no direct equivalent for.
 - Julia Uniform(a, b) -> scipy uniform(a, b - a).
 
-hello there
+hello three
+HI THERE JAMIL
