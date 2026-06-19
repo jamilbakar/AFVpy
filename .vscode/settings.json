@@ -1,0 +1,7 @@
+{
+    "gitdoc.ai.enabled": false,
+    "gitdoc.enabled": true,
+    "gitdoc.autoPush": "afterDelay",
+    "gitdoc.commitOnClose": true,
+    "gitdoc.commitValidationLevel": "none"
+}
