@@ -1,6 +1,6 @@
 {
     "gitdoc.ai.enabled": false,
-    "gitdoc.enabled": true,
+    "gitdoc.enabled": false,
     "gitdoc.autoPush": "afterDelay",
     "gitdoc.commitOnClose": true,
     "gitdoc.commitValidationLevel": "none",
