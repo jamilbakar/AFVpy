@@ -1,0 +1,132 @@
+import numpy as np
+from collections import namedtuple
+
+# Algorithm 9.3: nonlinear forward reachability using conservative linearization
+# (eq 9.23). WALLs: IntervalArithmetic.jl (interval, interval_hull, mid),
+# ForwardDiff.jl (jacobian/hessian over intervals), and LazySets.jl (Hyperrectangle,
+# UnionSetArray, Minkowski sum ⊕, Cartesian product ×, low/high) have no drop-in
+# Python equivalents. sets is system-specific.
+
+Transition = namedtuple("Transition", ["s", "o", "a", "x"])
+Interval = namedtuple("Interval", ["lo", "hi"])
+
+
+class Hyperrectangle:
+    def __init__(self, low, high):
+        self.low = np.asarray(low, dtype=float)
+        self.high = np.asarray(high, dtype=float)
+
+
+class UnionSetArray:
+    def __init__(self, sets):
+        self.sets = list(sets)
+
+
+def extract(env, x):
+    raise NotImplementedError  # system-specific
+
+
+def sets(sys, d):
+    raise NotImplementedError  # system-specific: (state set, disturbance set) at depth d
+
+
+def jacobian(f, x):
+    raise NotImplementedError  # ForwardDiff.jacobian
+
+
+def hessian(f, x):
+    raise NotImplementedError  # ForwardDiff.hessian over intervals
+
+
+def interval(lo, hi):
+    return Interval(lo, hi)
+
+
+def interval_hull(P):
+    raise NotImplementedError  # LazySets: interval_hull(P)
+
+
+def low(P):
+    raise NotImplementedError  # LazySets: low(P)
+
+
+def high(P):
+    raise NotImplementedError  # LazySets: high(P)
+
+
+def minkowski_sum(A, B):       # LazySets ⊕
+    return A + B
+
+
+def linear_map(M, S):          # LazySets M * S
+    return M @ S
+
+
+def cartesian_product(A, B):   # LazySets ×
+    return A * B
+
+
+def mid(i):
+    return (i.lo + i.hi) / 2
+
+
+def step(sys, s, x):
+    o = sys.sensor.observe(s, x.xo)
+    a = sys.agent.act(o, x.xa)
+    s_next = sys.env.step(s, a, x.xs)
+    return o, a, s_next
+
+
+def rollout(sys, s, x_traj, d=None):
+    if d is None:
+        d = len(x_traj)
+    tau = []
+    for t in range(d):
+        x = x_traj[t]
+        o, a, s_next = step(sys, s, x)
+        tau.append(Transition(s, o, a, x))
+        s = s_next
+    return tau
+
+
+def r(sys, x):
+    s, x = extract(sys.env, x)
+    tau = rollout(sys, s, x)
+    return tau[-1].s
+
+
+def to_hyperrectangle(I):
+    return Hyperrectangle(low=[i.lo for i in I], high=[i.hi for i in I])
+
+
+def to_intervals(P):
+    return [interval(lo, hi) for lo, hi in zip(low(P), high(P))]
+
+
+def conservative_linearization(sys, P):
+    I = to_intervals(interval_hull(P))
+    c = [mid(i) for i in I]
+    fc = r(sys, c)
+    J = jacobian(lambda x: r(sys, x), c)
+    Ic = np.array(I) - np.array(c)  # I - c
+    alpha = to_hyperrectangle([Ic @ hessian(lambda x: r(sys, x)[i], I) @ Ic
+                               for i in range(len(fc))])
+    return minkowski_sum(fc + linear_map(J, minkowski_sum(P, [-ci for ci in c])), alpha)
+
+
+class ReachabilityAlgorithm:
+    pass
+
+
+class ConservativeLinearization(ReachabilityAlgorithm):
+    def __init__(self, h):
+        self.h = h
+
+
+def reachable(alg, sys):
+    Rs = []
+    for d in range(1, alg.h + 1):
+        S, X = sets(sys, d)
+        Sp = conservative_linearization(sys, cartesian_product(S, X))
+        Rs.append(Sp)
+    return UnionSetArray(Rs)
