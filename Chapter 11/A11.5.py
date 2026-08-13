@@ -18,7 +18,9 @@ def extract(env, x):
 
 
 def robustness(states, formula):
-    raise NotImplementedError  # STL robustness
+    # stljax backend; signal shape [time, state_dim].
+    import jax.numpy as jnp
+    return float(formula.robustness(jnp.asarray(states)))
 
 
 class NominalTrajectoryDistribution:

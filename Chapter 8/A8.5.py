@@ -14,12 +14,25 @@ def minkowski_sum(A, B):
     return A + B
 
 
+class UnionSetArray:       # pycvxset has no union type; keep the convex pieces
+    def __init__(self, sets):
+        self.sets = list(sets)
+
+
 def union(A, B):
-    return A | B
+    if isinstance(A, UnionSetArray):
+        return UnionSetArray(A.sets + [B])
+    return UnionSetArray([A, B])
 
 
-def overapproximate(S, eps):  # LazySets: overapproximate(S, eps)
-    return S.overapproximate(eps)
+def overapproximate(S, eps):  # LazySets overapproximate -> axis-aligned box via support
+    import numpy as np
+    d = S.dim
+    I = np.eye(d)
+    lb = np.array([-S.support(-I[i])[0] for i in range(d)])
+    ub = np.array([S.support(I[i])[0] for i in range(d)])
+    from pycvxset import Polytope
+    return Polytope(c=(lb + ub) / 2, h=(ub - lb) / 2)
 
 
 def get_matrices(sys):

@@ -7,5 +7,6 @@
     "gitdoc.autoCommitDelay": 5000,
     "gitdoc.autoPushDelay": 5000,
     "gitdoc.autoPull": "off",
-    "gitdoc.pullOnOpen": true
+    "gitdoc.pullOnOpen": true,
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

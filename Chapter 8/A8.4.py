@@ -14,16 +14,23 @@ def minkowski_sum(A, B):
     return A + B
 
 
+class UnionSetArray:       # pycvxset has no union type; keep the convex pieces
+    def __init__(self, sets):
+        self.sets = list(sets)
+
+
 def union(A, B):
-    return A | B
+    if isinstance(A, UnionSetArray):
+        return UnionSetArray(A.sets + [B])
+    return UnionSetArray([A, B])
 
 
-def intersection(A, B):    # LazySets: A ∩ B
-    return A & B
+def intersection(A, B):    # LazySets A ∩ B -> pycvxset .intersection
+    return A.intersection(B)
 
 
-def is_empty(S):           # LazySets: isempty(S)
-    return S.isempty()
+def is_empty(S):           # LazySets isempty(S) -> pycvxset .is_empty (property)
+    return S.is_empty
 
 
 def negate(psi):           # ¬(ψ::AvoidSetSpecification) = ψ.set

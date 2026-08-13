@@ -14,11 +14,17 @@ def extract(env, x):
 
 
 def robustness(states, formula):
-    raise NotImplementedError  # STL robustness
+    # stljax backend; signal shape [time, state_dim]. Use jnp so jax.grad can trace it.
+    import jax.numpy as jnp
+    return formula.robustness(jnp.asarray(states))
 
 
 def gradient(f, x):
-    raise NotImplementedError  # ForwardDiff.gradient
+    # ForwardDiff.gradient -> jax.grad. The system (rollout/extract) must be written
+    # with jax.numpy so the computation is differentiable.
+    import jax
+    import jax.numpy as jnp
+    return np.asarray(jax.grad(f)(jnp.asarray(x, dtype=float)))
 
 
 def step(sys, s, x):

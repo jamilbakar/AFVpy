@@ -14,8 +14,15 @@ def minkowski_sum(A, B):
     return A + B
 
 
+class UnionSetArray:       # pycvxset has no union type; keep the convex pieces
+    def __init__(self, sets):
+        self.sets = list(sets)
+
+
 def union(A, B):           # LazySets: A ∪ B
-    return A | B
+    if isinstance(A, UnionSetArray):
+        return UnionSetArray(A.sets + [B])
+    return UnionSetArray([A, B])
 
 
 def get_matrices(sys):

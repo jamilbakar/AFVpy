@@ -1,31 +1,44 @@
 import numpy as np
 import cvxpy as cp
+from pycvxset import Polytope
 
-# Algorithm 8.7: linear forward reachability using linear programming. For each depth
-# it builds the constrained model (8.6) and evaluates the support function in every
-# direction, then unions the resulting polytope into the reachable set.
-# Self-sufficient: includes constrained_model / rho (8.6). WALLs: JuMP.jl -> cvxpy;
-# LazySets.jl (HPolytope, HalfSpace, union, Ab) assume a set library.
+# Algorithm 8.7 (pycvxset backend): linear forward reachability via linear programming.
+# LazySets -> pycvxset mapping:
+#   Ab(P)                 -> (P.A, P.b)              (H-rep A x <= b)
+#   HalfSpace(dir, val)   -> (dir, val) pair         (dir . x <= val)
+#   HPolytope(halfspaces) -> Polytope(A=..., b=...)
+#   union(A, B)           -> UnionSetArray (a union of convex sets is not convex, so
+#                            the pieces are kept, as LazySets' UnionSetArray does)
+# The optimization model uses cvxpy. Install: pip install cvxpy pycvxset.
 
 
-def dim(S):
-    return S.dim
+class UnionSetArray:
+    def __init__(self, sets):
+        self.sets = list(sets)
+
+
+def union(A, B):
+    if isinstance(A, UnionSetArray):
+        return UnionSetArray(A.sets + [B])
+    return UnionSetArray([A, B])
 
 
 def Ab(P):
     return P.A, P.b
 
 
-def union(A, B):
-    return A | B
+def HalfSpace(direction, value):
+    return (np.asarray(direction, dtype=float), float(value))  # direction . x <= value
 
 
-def HalfSpace(direction, value):     # LazySets: HalfSpace(d, ρ)
-    raise NotImplementedError
+def HPolytope(halfspaces):
+    A = np.array([h[0] for h in halfspaces], dtype=float)
+    b = np.array([h[1] for h in halfspaces], dtype=float)
+    return Polytope(A=A, b=b)
 
 
-def HPolytope(halfspaces):           # LazySets: HPolytope([...])
-    raise NotImplementedError
+def dim(S):
+    return S.dim
 
 
 def get_matrices(sys):
@@ -73,9 +86,9 @@ class ReachabilityAlgorithm:
 
 class LinearProgramming(ReachabilityAlgorithm):
     def __init__(self, h, D, tol):
-        self.h = h      # time horizon
-        self.D = D      # directions to evaluate the support function
-        self.tol = tol  # tolerance for checking satisfaction (used by 8.8)
+        self.h = h
+        self.D = D
+        self.tol = tol
 
 
 def reachable(alg, sys):
