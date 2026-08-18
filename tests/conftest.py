@@ -1,7 +1,7 @@
 """Test fixtures + a loader for the dotted algorithm filenames (e.g. A4.1.py).
 
 Python can't `import A4.1` (the dot is illegal in a module name), so we load each
-algorithm file by path with importlib. `load("A4.1")` returns the module object for
+algorithm file by path with importlib. `load("algorithm_4_1")` returns the module object for
 the file A4.1.py found anywhere under the repo root.
 """
 import importlib.util

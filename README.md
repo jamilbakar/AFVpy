@@ -11,15 +11,18 @@ continuous integration, and code coverage.
 ## Layout
 
 ```
-Appendix/      A2.py … A8.py     (the example systems, one per appendix section)
-Chapter 1/     A1.1.py …          (algorithms, named A<chapter>.<n>.py)
+Appendix/      appendix_<system>.py         (the example systems)
+Chapter 1/     algorithm_1_1.py …           (algorithms, named algorithm_<chapter>_<n>.py)
 …
-Chapter 9/     A9.1.py …, Interval_ad.py   (interval arithmetic + AD backend)
-Chapter 12/    A12.1.py …
+Chapter 9/     algorithm_9_1.py …, Interval_ad.py   (interval arithmetic + AD backend)
+Chapter 12/    algorithm_12_1.py …
 tests/         one test file per chapter + conftest.py
 .github/workflows/tests.yml       CI: run tests + coverage on every push/PR
 pyproject.toml requirements.txt
 ```
+
+Files are named `algorithm_<chapter>_<n>.py` so each is identifiable by chapter,
+and the Appendix systems by name (`appendix_simple_gaussian.py`, etc.).
 
 ## Running the tests
 
@@ -28,10 +31,10 @@ pip install -r requirements.txt
 pytest
 ```
 
-`pytest` runs the whole suite and prints a coverage summary. Because the files
-are named with dots (`A4.1.py`), the tests load them by path via a small
-`load("A4.1")` helper in `tests/conftest.py` — Python can't `import A4.1`
-directly. Tests needing an uninstalled optional library are skipped, not failed.
+`pytest` runs the whole suite and prints a coverage summary. The tests locate
+each module across the chapter folders via a small `load("algorithm_4_1")` helper
+in `tests/conftest.py`. Tests needing an uninstalled optional library are skipped,
+not failed.
 
 ## Dependencies
 

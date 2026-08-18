@@ -27,7 +27,7 @@ def _system():
 
 
 def test_ch9_natural_inclusion_sound():
-    a, D = _system(); m = load("A9.1")
+    a, D = _system(); m = load("algorithm_9_1")
     m.extract = lambda env, x: ([x[0]], [D(None, None, [x[1]]), D(None, None, [x[2]])])
     m.intervals = lambda sys, d: [Interval(0.0, 0.2), Interval(0.0, 0.0), Interval(0.0, 0.0)]
     box = m.reachable(m.NaturalInclusion(1), a).sets[0]
@@ -35,7 +35,7 @@ def test_ch9_natural_inclusion_sound():
 
 
 def test_ch9_taylor_inclusion_sound():
-    a, D = _system(); m = load("A9.2")
+    a, D = _system(); m = load("algorithm_9_2")
     m.extract = lambda env, x: ([x[0]], [D(None, None, [x[1]]), D(None, None, [x[2]])])
     m.intervals = lambda sys, d: [Interval(0.0, 0.2), Interval(0.0, 0.0), Interval(0.0, 0.0)]
     for order in (1, 2):
@@ -44,7 +44,7 @@ def test_ch9_taylor_inclusion_sound():
 
 
 def test_ch9_conservative_linearization_sound():
-    a, D = _system(); m = load("A9.3")
+    a, D = _system(); m = load("algorithm_9_3")
     m.extract = lambda env, x: ([x[0]], [D(None, None, [x[1]]), D(None, None, [x[2]])])
     Hyper = m.Hyperrectangle
     m.sets = lambda sys, d: (Hyper(low=[0.0], high=[0.2]), Hyper(low=[0.0, 0.0], high=[0.0, 0.0]))
@@ -54,11 +54,11 @@ def test_ch9_conservative_linearization_sound():
 
 def test_ch9_concrete_variants_run():
     a, D = _system()
-    m4 = load("A9.4")
+    m4 = load("algorithm_9_4")
     m4.extract = lambda env, x: ([x[0]], [D(None, None, [x[i]]) for i in range(1, len(x))])
     m4.intervals = lambda sys, d: [Interval(0.0, 0.2), Interval(0.0, 0.0)]
     assert len(m4.reachable(m4.ConcreteTaylorInclusion(2, 1), a).sets) == 2
-    m5 = load("A9.5")
+    m5 = load("algorithm_9_5")
     m5.extract = lambda env, x: ([x[0]], [D(None, None, [x[1]]), D(None, None, [x[2]])])
     Hyper = m5.Hyperrectangle
     m5.sets = lambda sys, d: (Hyper(low=[0.0], high=[0.2]), Hyper(low=[0.0, 0.0], high=[0.0, 0.0]))

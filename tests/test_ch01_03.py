@@ -4,7 +4,7 @@ from conftest import load
 
 
 def test_ch1_step_and_rollout():
-    A1_1, A1_2, A2 = load("A1.1"), load("A1.2"), load("A2")
+    A1_1, A1_2, A2 = load("algorithm_1_1"), load("algorithm_1_2"), load("appendix_simple_gaussian")
     sys = A1_1.System(A2.NoAgent(), A2.SimpleGaussian(), A2.IdealSensor())
     o, a, s_next = A1_2.step(sys, 1.5)
     assert o == 1.5 and a is None and s_next == 1.5
@@ -12,7 +12,7 @@ def test_ch1_step_and_rollout():
 
 
 def test_ch1_specification():
-    m = load("A1.3")
+    m = load("algorithm_1_3")
     T = namedtuple("T", ["s"])
 
     class AllPositive(m.Specification):
@@ -30,7 +30,7 @@ def test_ch1_specification():
 def test_ch2_mle():
     from scipy.stats import norm
     from scipy.optimize import minimize
-    m = load("A2.1")
+    m = load("algorithm_2_1")
     np.random.seed(0)
     data = [(0.0, v) for v in np.random.normal(3.0, 1.0, 300)]
     mle = m.MaximumLikelihoodParameterEstimation(
@@ -40,7 +40,7 @@ def test_ch2_mle():
 
 
 def test_ch3_ltl_stl():
-    A3_1, A3_2 = load("A3.1"), load("A3.2")
+    A3_1, A3_2 = load("algorithm_3_1"), load("algorithm_3_2")
     T = namedtuple("T", ["s"])
     tau = [T(s) for s in [100, 80, 60, 40, 55, 70]]
     ltl = A3_1.LTLSpecification(lambda st: all(abs(s) > 50 for s in st))

@@ -5,7 +5,7 @@ from conftest import load
 
 
 def test_ch8_avoid_set_spec():
-    a1 = load("A8.1")
+    a1 = load("algorithm_8_1")
 
     class Box:
         def __init__(self, lo, hi):
@@ -43,7 +43,7 @@ def _box_system():
 
 def test_ch8_support_function():
     pytest.importorskip("cvxpy")
-    a6 = load("A8.6")
+    a6 = load("algorithm_8_6")
     sys, _ = _box_system()
     m = a6.constrained_model(sys, 3, sys.env.S1(), sys.disturbance_set())
     assert abs(a6.rho(m, np.array([1.0]), 3) - 2.0) < 1e-3
@@ -51,7 +51,7 @@ def test_ch8_support_function():
 
 def test_ch8_satisfies_lp():
     pytest.importorskip("cvxpy")
-    a8 = load("A8.8")
+    a8 = load("algorithm_8_8")
     sys, Box = _box_system()
     Avoid = namedtuple("Avoid", ["set"])
     alg = a8.LinearProgramming(h=3, D=None, tol=1e-4)
@@ -61,4 +61,4 @@ def test_ch8_satisfies_lp():
 
 def test_ch8_pycvxset_import():
     pytest.importorskip("pycvxset")
-    assert hasattr(load("A8.7"), "reachable")
+    assert hasattr(load("algorithm_8_7"), "reachable")

@@ -19,23 +19,23 @@ def _chain():
 
 
 def test_ch10_to_graph():
-    assert load("A10.1").to_graph(_chain())._succ[0] == {1: 0.5, 0: 0.5}
+    assert load("algorithm_10_1").to_graph(_chain())._succ[0] == {1: 0.5, 0: 0.5}
 
 
 def test_ch10_forward_backward():
-    a2, a3 = load("A10.2"), load("A10.3")
+    a2, a3 = load("algorithm_10_2"), load("algorithm_10_3")
     Spec = namedtuple("Spec", ["set"])
     assert sorted(a2.reachable(a2.DiscreteForward(5), _chain())) == [0, 1, 2]
     assert sorted(a3.backward_reachable(a3.DiscreteBackward(5), _chain(), Spec({2}))) == [0, 1, 2]
 
 
 def test_ch10_occupancy():
-    a4 = load("A10.4")
+    a4 = load("algorithm_10_4")
     assert abs(a4.reachable(a4.ProbabilisticOccupancy(3), _chain()).P[2] - 0.5) < 1e-9
 
 
 def test_ch10_horizons():
-    a5, a6 = load("A10.5"), load("A10.6")
+    a5, a6 = load("algorithm_10_5"), load("algorithm_10_6")
     Spec = namedtuple("Spec", ["set"])
     assert abs(a5.reachable(a5.ProbabilisticFiniteHorizon(5), _chain(), Spec({2})) - 0.875) < 1e-9
     assert abs(a6.reachable(a6.ProbabilisticInfiniteHorizon(), _chain(), Spec({2})) - 1.0) < 1e-9
