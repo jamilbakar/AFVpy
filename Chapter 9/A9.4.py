@@ -1,13 +1,12 @@
 import numpy as np
 from collections import namedtuple
+from Interval_ad import Interval, gradient, hessian, mid
 
 # Algorithm 9.4: nonlinear forward reachability using Taylor inclusion, concretizing
-# the reachable set at each step. Self-sufficient: includes taylor_inclusion (9.2).
-# WALLs: ForwardDiff gradient/hessian over intervals, IntervalArithmetic, and LazySets
-# have no drop-in Python equivalents; intervals/extract are system-specific.
+# the reachable set at each step. Backend: interval_ad (interval-valued gradient/
+# hessian). Includes taylor_inclusion (9.2). intervals/extract are system-specific.
 
 Transition = namedtuple("Transition", ["s", "o", "a", "x"])
-Interval = namedtuple("Interval", ["lo", "hi"])
 
 
 class Hyperrectangle:
@@ -21,24 +20,12 @@ class UnionSetArray:
         self.sets = list(sets)
 
 
-def extract(env, x):
-    raise NotImplementedError  # system-specific
-
-
 def intervals(sys, d):
     raise NotImplementedError  # system-specific
 
 
-def gradient(f, x):
-    raise NotImplementedError  # ForwardDiff.gradient over intervals
-
-
-def hessian(f, x):
-    raise NotImplementedError  # ForwardDiff.hessian over intervals
-
-
-def mid(i):
-    return (i.lo + i.hi) / 2
+def extract(env, x):
+    raise NotImplementedError  # system-specific
 
 
 def step(sys, s, x):
@@ -70,15 +57,27 @@ def to_hyperrectangle(I):
     return Hyperrectangle(low=[i.lo for i in I], high=[i.hi for i in I])
 
 
+def _dot(a, b):
+    acc = Interval(0.0)
+    for ai, bi in zip(a, b):
+        acc = acc + ai * bi
+    return acc
+
+
 def taylor_inclusion(sys, I, order):
     c = [mid(i) for i in I]
-    fc = r(sys, c)
-    Ic = np.array(I) - np.array(c)
-    if order == 1:
-        Ip = [fc[i] + gradient(lambda x: r(sys, x)[i], I) @ Ic for i in range(len(fc))]
-    else:
-        Ip = [fc[i] + gradient(lambda x: r(sys, x)[i], c) @ Ic
-              + Ic @ hessian(lambda x: r(sys, x)[i], I) @ Ic for i in range(len(fc))]
+    fc = r(sys, [Interval(ci) for ci in c])
+    Ic = [I[k] - c[k] for k in range(len(I))]
+    Ip = []
+    for i in range(len(fc)):
+        if order == 1:
+            g = gradient(lambda x: r(sys, x)[i], I)
+            Ip.append(fc[i] + _dot(g, Ic))
+        else:
+            g = gradient(lambda x: r(sys, x)[i], [Interval(ci) for ci in c])
+            H = hessian(lambda x: r(sys, x)[i], I)
+            quad = _dot(Ic, [_dot(H[a], Ic) for a in range(len(Ic))])
+            Ip.append(fc[i] + _dot(g, Ic) + quad)
     return Ip
 
 
@@ -99,9 +98,8 @@ def reachable(alg, sys):
     for d in range(2, alg.h + 1):  # Julia 2:h
         Ip = taylor_inclusion(sys, I, alg.order)
         Is.append(Ip)
-        # NOTE: the source prints extract(sys.env, I); the intent (see caption) is to
-        # extract the NEW state from I' for the next step, so Ip is used here.
+        # NOTE: extract the NEW state from I' for the next step (see 9.2 caption).
         s, _ = extract(sys.env, Ip)
         I = list(I)
-        I[:len(s)] = s  # I[1:length(s)] = s
+        I[:len(s)] = s
     return UnionSetArray([to_hyperrectangle(Ip) for Ip in Is])

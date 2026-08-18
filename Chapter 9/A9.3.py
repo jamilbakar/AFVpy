@@ -1,14 +1,14 @@
 import numpy as np
 from collections import namedtuple
+from Interval_ad import Interval, jacobian, hessian, mid
 
 # Algorithm 9.3: nonlinear forward reachability using conservative linearization
-# (eq 9.23). WALLs: IntervalArithmetic.jl (interval, interval_hull, mid),
-# ForwardDiff.jl (jacobian/hessian over intervals), and LazySets.jl (Hyperrectangle,
-# UnionSetArray, Minkowski sum ⊕, Cartesian product ×, low/high) have no drop-in
-# Python equivalents. sets is system-specific.
+# (eq 9.23). Backend: interval_ad (Interval arithmetic + interval-valued jacobian/
+# hessian). Sets are hyperrectangles; the LazySets operations (interval_hull, ⊕, ×,
+# linear map) are done with interval arithmetic so no polytope library is needed.
+# The system r must be written with interval_ad ops. sets(sys, d) is system-specific.
 
 Transition = namedtuple("Transition", ["s", "o", "a", "x"])
-Interval = namedtuple("Interval", ["lo", "hi"])
 
 
 class Hyperrectangle:
@@ -28,46 +28,6 @@ def extract(env, x):
 
 def sets(sys, d):
     raise NotImplementedError  # system-specific: (state set, disturbance set) at depth d
-
-
-def jacobian(f, x):
-    raise NotImplementedError  # ForwardDiff.jacobian
-
-
-def hessian(f, x):
-    raise NotImplementedError  # ForwardDiff.hessian over intervals
-
-
-def interval(lo, hi):
-    return Interval(lo, hi)
-
-
-def interval_hull(P):
-    raise NotImplementedError  # LazySets: interval_hull(P)
-
-
-def low(P):
-    raise NotImplementedError  # LazySets: low(P)
-
-
-def high(P):
-    raise NotImplementedError  # LazySets: high(P)
-
-
-def minkowski_sum(A, B):       # LazySets ⊕
-    return A + B
-
-
-def linear_map(M, S):          # LazySets M * S
-    return M @ S
-
-
-def cartesian_product(A, B):   # LazySets ×
-    return A * B
-
-
-def mid(i):
-    return (i.lo + i.hi) / 2
 
 
 def step(sys, s, x):
@@ -100,18 +60,39 @@ def to_hyperrectangle(I):
 
 
 def to_intervals(P):
-    return [interval(lo, hi) for lo, hi in zip(low(P), high(P))]
+    return [Interval(lo, hi) for lo, hi in zip(P.low, P.high)]
+
+
+def cartesian_product(A, B):  # LazySets ×  (hyperrectangles concatenate)
+    return Hyperrectangle(low=np.concatenate([A.low, B.low]),
+                          high=np.concatenate([A.high, B.high]))
+
+
+def _dot(a, b):
+    acc = Interval(0.0)
+    for ai, bi in zip(a, b):
+        acc = acc + ai * bi
+    return acc
 
 
 def conservative_linearization(sys, P):
-    I = to_intervals(interval_hull(P))
-    c = [mid(i) for i in I]
-    fc = r(sys, c)
-    J = jacobian(lambda x: r(sys, x), c)
-    Ic = np.array(I) - np.array(c)  # I - c
-    alpha = to_hyperrectangle([Ic @ hessian(lambda x: r(sys, x)[i], I) @ Ic
-                               for i in range(len(fc))])
-    return minkowski_sum(fc + linear_map(J, minkowski_sum(P, [-ci for ci in c])), alpha)
+    I = to_intervals(P)                                 # interval_hull(P) already a box
+    c = [mid(i) for i in I]                             # midpoint
+    fc = [mid(v) for v in r(sys, [Interval(ci) for ci in c])]
+    Jiv = jacobian(lambda x: r(sys, x), [Interval(ci) for ci in c])
+    J = np.array([[mid(Jiv[i][j]) for j in range(len(I))] for i in range(len(fc))])
+    Ic = [I[k] - c[k] for k in range(len(I))]           # I - c  (= P ⊕ -c as intervals)
+    # alpha_i = (I - c)' * hessian_i * (I - c), evaluated over intervals
+    alpha = []
+    for i in range(len(fc)):
+        H = hessian(lambda x: r(sys, x)[i], I)
+        alpha.append(_dot(Ic, [_dot(H[a], Ic) for a in range(len(Ic))]))
+    # fc + J * (P ⊕ -c) ⊕ alpha, all done in interval arithmetic -> a hyperrectangle
+    out = []
+    for i in range(len(fc)):
+        Jrow = [Interval(J[i][j]) for j in range(len(I))]
+        out.append(Interval(fc[i]) + _dot(Jrow, Ic) + alpha[i])
+    return to_hyperrectangle(out)
 
 
 class ReachabilityAlgorithm:
@@ -127,6 +108,5 @@ def reachable(alg, sys):
     Rs = []
     for d in range(1, alg.h + 1):
         S, X = sets(sys, d)
-        Sp = conservative_linearization(sys, cartesian_product(S, X))
-        Rs.append(Sp)
+        Rs.append(conservative_linearization(sys, cartesian_product(S, X)))
     return UnionSetArray(Rs)

@@ -1,0 +1,9 @@
+numpy
+scipy
+cvxpy
+stljax
+jax
+pytest
+pytest-cov
+# pycvxset (Chapter 8 set ops) installs from GitHub and needs gmp/cddlib system libs:
+#   pip install "pycddlib>=3.0.0" "git+https://github.com/merlresearch/pycvxset.git"

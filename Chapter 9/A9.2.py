@@ -1,14 +1,14 @@
 import numpy as np
 from collections import namedtuple
+from Interval_ad import Interval, gradient, hessian, mid
 
-# Algorithm 9.2: nonlinear forward reachability using first- or second-order Taylor
-# inclusion functions (eq 9.17 / 9.19). WALLs: ForwardDiff.jl gradient/hessian
-# evaluated OVER INTERVALS has no drop-in Python equivalent (autodiff + interval
-# arithmetic); intervals/extract are system-specific; LazySets Hyperrectangle/
-# UnionSetArray are minimal here.
+# Algorithm 9.2: nonlinear forward reachability using first/second-order Taylor
+# inclusion (eq 9.17 / 9.19). Backend: interval_ad provides gradient and hessian
+# evaluated OVER INTERVALS (replaces ForwardDiff.jl composed with IntervalArithmetic.jl).
+# The system r must be written with interval_ad ops. intervals/extract are
+# system-specific.
 
 Transition = namedtuple("Transition", ["s", "o", "a", "x"])
-Interval = namedtuple("Interval", ["lo", "hi"])
 
 
 class Hyperrectangle:
@@ -22,24 +22,12 @@ class UnionSetArray:
         self.sets = list(sets)
 
 
-def extract(env, x):
-    raise NotImplementedError  # system-specific
-
-
 def intervals(sys, d):
     raise NotImplementedError  # system-specific
 
 
-def gradient(f, x):
-    raise NotImplementedError  # ForwardDiff.gradient, evaluated over intervals
-
-
-def hessian(f, x):
-    raise NotImplementedError  # ForwardDiff.hessian, evaluated over intervals
-
-
-def mid(i):
-    return (i.lo + i.hi) / 2
+def extract(env, x):
+    raise NotImplementedError  # system-specific
 
 
 def step(sys, s, x):
@@ -71,17 +59,27 @@ def to_hyperrectangle(I):
     return Hyperrectangle(low=[i.lo for i in I], high=[i.hi for i in I])
 
 
+def _dot(a, b):  # interval dot product of two interval vectors
+    acc = Interval(0.0)
+    for ai, bi in zip(a, b):
+        acc = acc + ai * bi
+    return acc
+
+
 def taylor_inclusion(sys, I, order):
-    c = [mid(i) for i in I]           # mid.(I)
-    fc = r(sys, c)
-    Ic = np.array(I) - np.array(c)    # I - c
-    if order == 1:
-        Ip = [fc[i] + gradient(lambda x: r(sys, x)[i], I) @ Ic
-              for i in range(len(fc))]
-    else:
-        Ip = [fc[i] + gradient(lambda x: r(sys, x)[i], c) @ Ic
-              + Ic @ hessian(lambda x: r(sys, x)[i], I) @ Ic
-              for i in range(len(fc))]
+    c = [mid(i) for i in I]                    # mid.(I)
+    fc = r(sys, [Interval(ci) for ci in c])    # r at the (degenerate-interval) midpoint
+    Ic = [I[k] - c[k] for k in range(len(I))]  # I - c
+    Ip = []
+    for i in range(len(fc)):
+        if order == 1:
+            g = gradient(lambda x: r(sys, x)[i], I)            # gradient over I
+            Ip.append(fc[i] + _dot(g, Ic))
+        else:
+            g = gradient(lambda x: r(sys, x)[i], [Interval(ci) for ci in c])  # at midpoint
+            H = hessian(lambda x: r(sys, x)[i], I)             # hessian over I
+            quad = _dot(Ic, [_dot(H[a], Ic) for a in range(len(Ic))])
+            Ip.append(fc[i] + _dot(g, Ic) + quad)
     return Ip
 
 
@@ -99,6 +97,5 @@ def reachable(alg, sys):
     Is = []
     for d in range(1, alg.h + 1):
         I = intervals(sys, d)
-        Ip = taylor_inclusion(sys, I, alg.order)
-        Is.append(Ip)
+        Is.append(taylor_inclusion(sys, I, alg.order))
     return UnionSetArray([to_hyperrectangle(Ip) for Ip in Is])

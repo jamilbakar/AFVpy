@@ -1,15 +1,15 @@
 import numpy as np
 from collections import namedtuple
+from Interval_ad import Interval
 
 # Algorithm 9.1: nonlinear forward reachability using natural inclusion functions.
-# For each depth it gets the input intervals and propagates them through the rollout
-# function using interval arithmetic. WALLs: IntervalArithmetic.jl (intervals flow
-# through the ordinary rollout via operator overloading) and LazySets.jl
-# (Hyperrectangle/UnionSetArray) have no drop-in Python equivalent. intervals and
-# extract are system-specific; the interval-aware component ops are assumed.
+# Backend: interval_ad (Interval arithmetic replaces IntervalArithmetic.jl; sets are
+# hyperrectangles, replacing LazySets). The system's step/observe/act must be written
+# with interval_ad ops (e.g. interval_ad.sin) so intervals propagate through rollout,
+# exactly as Julia requires the system to be interval-arithmetic compatible.
+# intervals(sys, d) and extract are system-specific.
 
 Transition = namedtuple("Transition", ["s", "o", "a", "x"])
-Interval = namedtuple("Interval", ["lo", "hi"])
 
 
 class Hyperrectangle:
@@ -23,12 +23,12 @@ class UnionSetArray:
         self.sets = list(sets)
 
 
-def extract(env, x):
-    raise NotImplementedError  # system-specific: x -> (initial_state, disturbance_traj)
-
-
 def intervals(sys, d):
     raise NotImplementedError  # system-specific: input intervals for a depth-d rollout
+
+
+def extract(env, x):
+    raise NotImplementedError  # system-specific: x -> (initial_state, disturbance_traj)
 
 
 def step(sys, s, x):
