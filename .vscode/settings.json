@@ -1,12 +1,13 @@
 {
-    "gitdoc.ai.enabled": false,
-    "gitdoc.enabled": false,
-    "gitdoc.autoPush": "afterDelay",
-    "gitdoc.commitOnClose": true,
-    "gitdoc.commitValidationLevel": "none",
-    "gitdoc.autoCommitDelay": 5000,
-    "gitdoc.autoPushDelay": 5000,
-    "gitdoc.autoPull": "off",
-    "gitdoc.pullOnOpen": true,
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+  "files.exclude": {
+    "**/.github": true,
+    "**/.vscode": true,
+    "**/.gitignore": true,
+    "**/.DS_Store": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+    "**/.coverage": true,
+    "**/.coverage.*": true,
+    "**/coverage.xml": true
+  }
 }
