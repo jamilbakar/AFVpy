@@ -1,8 +1,25 @@
 # Chapter 12 — Operational Design Domain Monitoring
 
-- **algorithm_12_1.py** — `KNNMonitor`: in-distribution if all k nearest neighbors are within a threshold distance.
-- **algorithm_12_2.py** — `HullMonitor`: in-distribution if the input lies in the convex hull of any cluster.
-- **algorithm_12_3.py** — `SuperlevelSetMonitor`: in-distribution if the density at the input exceeds a threshold.
+Runtime monitors that decide, for a *live* input, whether it falls inside the
+operational design domain (ODD) — the region of inputs the system was validated on.
+If an input drifts outside it, the monitor flags that the validation guarantees no
+longer apply. Each monitor defines the ODD differently.
+
+### algorithm_12_1.py — KNN monitor
+Defines the ODD by the training/ODD data itself. It builds a k-d tree of the data
+and, for a new input, flags it as in-distribution only if all `k` nearest neighbors
+are within a threshold distance `γ` — i.e. the input is near enough to known data.
+
+### algorithm_12_2.py — Hull monitor
+Defines the ODD as the union of the convex hulls of clustered data. An input is
+in-distribution if it lies inside any cluster's convex hull. Membership is tested by
+checking whether the input can be written as a convex combination of that cluster's
+points.
+
+### algorithm_12_3.py — Superlevel-set monitor
+Defines the ODD via a fitted probability distribution: an input is in-distribution if
+its probability density exceeds a threshold `γ` (it lies in a high-density
+"superlevel set"). The most compact definition when you have a good density model.
 
 ## Walls / problems
 
