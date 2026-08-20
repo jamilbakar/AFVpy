@@ -27,3 +27,7 @@ its probability density exceeds a threshold `γ` (it lies in a high-density
 - **LazySets `convex_hull` + `VPolytope` membership → a linear program** (12.2). Rather than a polytope library, membership is tested as "is the input a convex combination of the cluster points" via `scipy.optimize.linprog` — equivalent, works in any dimension.
 - 12.3 is a direct one-liner (`dist.pdf(input) > γ`).
 - All three run with only numpy/scipy.
+
+---
+
+*Python code created by Jamil Bakar.*

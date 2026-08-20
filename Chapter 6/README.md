@@ -27,3 +27,7 @@ MCMC algorithm then draws samples from it.
 - **1-based inclusive slice.** Julia's `τs[m_burnin:m_skip:end]` → Python `taus[m_burnin-1::m_skip]`.
 - **Turing.jl (6.3) has no drop-in Python equivalent.** The `@model` with latent `~` disturbances and `@addlogprob!` is rewritten as a `log_density(s0, xo, xa, xs)` (each `~` adds a `logpdf`; `@addlogprob!` becomes the smoothed indicator term), and `Turing.sample(...)` becomes a pluggable `sampler(log_density, sys, d, k_max)`.
 - 6.1 and 6.2 are direct translations (rollout + pdf carry over exactly).
+
+---
+
+*Python code created by Jamil Bakar.*

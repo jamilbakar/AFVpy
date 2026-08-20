@@ -53,3 +53,7 @@ acceleration limit) plus noise.
 - **1-based → 0-based indexing.** Grid/continuum action indices shift by one; grid *positions* stay 1-based (they're coordinates, not list indices).
 - **Name clashes.** Julia lets a struct field and a function share a name (`Do`, `Ds`); Python can't, so the accessors were renamed (`Do_dist`, `Ds_dist`).
 - **Size-agnostic `I`** → explicit `np.eye(2)`; **GridInterpolations.jl / LazySets.jl** (continuum world) replaced by `scipy.interpolate` + a small containment LP.
+
+---
+
+*Python code created by Jamil Bakar.*

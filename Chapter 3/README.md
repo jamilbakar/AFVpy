@@ -20,3 +20,7 @@ what the aircraft example in later chapters needs.
 - **SignalTemporalLogic.jl formulas** have no drop-in Python equivalent; `formula` is a plug-in callable (later, a real robustness value via stljax).
 - **Interval indexing.** Julia's `ψ.I` is a 1-based inclusive range (e.g. `3:10`); in Python it's a `slice`, so `3:10` → `slice(2, 10)`.
 - Each spec is self-sufficient: it defines its own `Specification`/`evaluate`/`isfailure` rather than importing Chapter 1.
+
+---
+
+*Python code created by Jamil Bakar.*

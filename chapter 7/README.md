@@ -68,3 +68,7 @@ probabilities is the failure probability.
 - **Source oddity in 7.9:** the code uses `mean(...)` on already-normalized weights; self-normalized IS (eq 7.33) is usually a weighted *sum* — reproduced as `np.mean` with a comment (swap to `np.sum` to match the equation).
 - **`for k in k_max` in 7.8** (iterating an integer, not valid Julia as printed) → `range(k_max)`; the `gb` closure captures the loop-updated `ratio` by late binding.
 - `rand(Categorical(w/sum w), m)` → `np.random.choice(..., size=m, p=...)`.
+
+---
+
+*Python code created by Jamil Bakar.*

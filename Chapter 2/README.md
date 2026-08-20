@@ -20,3 +20,7 @@ MCMC sampler, giving a full picture of parameter uncertainty.
 
 - **`logpdf(dist, y)` → `dist.logpdf(y)`** (free function in Julia, method in Python).
 - **Turing.jl has no drop-in Python equivalent.** The `@model` / `~` probabilistic program is rewritten by hand as a log-posterior (each `~` becomes an added `logpdf` term), and `Turing.sample(...)` becomes a pluggable `sampler(log_post, m)` you supply (a small Metropolis-Hastings, or PyMC/NumPyro). Faithful in meaning, not a literal transcription.
+
+---
+
+*Python code created by Jamil Bakar.*

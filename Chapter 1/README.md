@@ -30,3 +30,7 @@ is simply its negation. Concrete specifications (Chapter 3) register their own
 - **Named tuples** `(; o, a, s′)` → Python `namedtuple` (`s_next`, since `s′` isn't a legal name).
 - **Dispatch for `evaluate`.** Julia dispatches `evaluate` on the specification type; Python uses `functools.singledispatch` so each concrete spec registers its own.
 - **1-based loop** `1:d` → `range(d)`.
+
+---
+
+*Python code created by Jamil Bakar.*

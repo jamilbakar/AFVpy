@@ -65,3 +65,7 @@ i.e. failure-prone, branches while still exploring).
 - **`extract`/`smooth_robustness` (5.1)** and **`perturb` (5.6)** are system-specific stubs; `smooth_robustness` uses stljax.
 - **Source inconsistency in 5.9:** the book calls `h(sgoal, node)` although `distance_h` is `(node, sgoal)`. Reproduced as-is with a comment — swap the arg order if using the default `distance_h`.
 - `argmin`/`norm`/`sortperm` → numpy; `pushfirst!` → `list.insert(0, ...)`.
+
+---
+
+*Python code created by Jamil Bakar.*

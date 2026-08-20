@@ -44,3 +44,7 @@ k-means (assign to nearest centroid, update centroids) to discover distinct
 - **System-specific stubs:** `extract` (11.1, 11.2, 11.3, 11.5) and `perturb` (11.1).
 - **k-means (11.6) is fully runnable** with no extra dependencies (you supply the feature extractor `phi` and distance `d`).
 - Faithful details: `std` → `np.std(ddof=1)`; permutation slices `𝒫[1:j]`/`𝒫[1:j-1]` → `perm[:j+1]`/`perm[:j]`; `mean(hcat(grads...), dims=2)` → `np.mean(np.column_stack(grads), axis=1)`.
+
+---
+
+*Python code created by Jamil Bakar.*

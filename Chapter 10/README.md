@@ -38,3 +38,7 @@ probability from every state, then weights by the initial distribution.
 - `Set(reduce(vcat, ...))` → set comprehension; the `R == (R ∪ S) && break` convergence check is preserved.
 - `(I − TR) \ R1` → `np.linalg.solve`; target rows are zeroed (`TR[STi,:] = 0`) to make targets absorbing before the solve.
 - Indices are 0-based throughout.
+
+---
+
+*Python code created by Jamil Bakar.*

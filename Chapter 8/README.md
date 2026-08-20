@@ -47,3 +47,7 @@ tolerance) means the system can reach the unsafe set, so the spec is not satisfi
 - **JuMP.jl → cvxpy.** `@variable`/`@constraint`/`@objective`/`optimize!` map to `cp.Variable` / a constraints list / `cp.Problem(...).solve()`. Used by 8.6 and 8.8 (fully runnable).
 - **LazySets.jl → pycvxset** (8.2–8.5, 8.7). `Ab(P)` → `(P.A, P.b)`; `HPolytope`/`HalfSpace` → `Polytope(A=, b=)`; `∩`→`.intersection`, `isempty`→`.is_empty`, `⊕`→`+`, linear map→`@`; `overapproximate` via support functions; `union` → a `UnionSetArray` list (a union of convex sets isn't convex, so the pieces are kept, as LazySets does). Install: `brew install gmp cddlib`, then pip pycddlib + pycvxset.
 - **Source detail in 8.6:** the book's `ρ(model, d, d)` reuses `d` for the direction and the depth (bold vs plain); split here into `rho(model, direction, depth)`.
+
+---
+
+*Python code created by Jamil Bakar.*

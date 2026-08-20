@@ -8,6 +8,9 @@ Python translations of the algorithms from *Algorithms for Validation*
 from the Appendix systems and Chapters 1–12 is included, with a unit-test suite,
 continuous integration, and code coverage.
 
+**Created by Jamil Bakar** — all Python code in this repository was written and
+tested by Jamil Bakar (translations of the book's algorithms).
+
 ## Layout
 
 ```

@@ -64,3 +64,7 @@ optimizer on it, returning whatever the optimizer finds.
 - **`extract` is system-specific** (splits the optimizer's flat vector into initial state + disturbances) — left as a stub you supply. Needed by 4.7, 4.9, 4.10.
 - **`robustness` → stljax** (`formula.robustness(signal)`, smoothed via `logsumexp`+temperature when `smoothness>0`).
 - Callable-struct/named-method mapping and named tuples as in Chapter 1.
+
+---
+
+*Python code created by Jamil Bakar.*

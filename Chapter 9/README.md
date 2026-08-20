@@ -41,3 +41,7 @@ numbers. It replaces both IntervalArithmetic.jl and ForwardDiff.jl.
 - **LazySets.jl avoided.** Sets are hyperrectangles, and `⊕`, `×`, `interval_hull`, and linear maps are done with interval arithmetic — no polytope library required.
 - **The system must be interval/AD-compatible:** `step` must use `Interval_ad.psin`/`pcos` (not `np.sin`) so intervals and dual numbers flow through — the same requirement Julia has for ForwardDiff.
 - **Source detail in 9.4:** the printed loop extracts from `I`, but (per the caption) it should extract the *new* state from `I'`; done that way here with a comment.
+
+---
+
+*Python code created by Jamil Bakar.*
